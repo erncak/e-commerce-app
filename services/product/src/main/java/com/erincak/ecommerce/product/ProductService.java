@@ -4,19 +4,25 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+
+    private final ProductRepository repository;
+    private final ProductMapper mapper;
     public Integer createProduct(ProductRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createProduct'");
-    }
+        var product = mapper.toProduct(request);
+        return repository.save(product).getId();
+     }
 
     public ProductResponse findById(Integer productId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+      return  repository.findById(productId)
+      .map(mapper::toProductResponse).orElseThrow(() -> new  EntityNotFoundException("Product with product Id not found::" + productId));
+
+      
     }
 
     public List<ProductResponse> findAll() {
