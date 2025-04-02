@@ -1,5 +1,8 @@
 package com.erincak.ecommerce.customer;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class CustomerMapper {
 
     public Customer toCustomer(CustomerRequest customerRequest) {

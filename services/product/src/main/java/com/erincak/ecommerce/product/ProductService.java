@@ -58,9 +58,17 @@ public class ProductService {
         var purchasedProducts = new ArrayList<ProductPurchaseResponse>();
 
         for (int i = 0; i < storedProducts.size(); i++){
-
-        }
-        return null;
+            var product = storedProducts.get(i);
+            var productRequest = storedRequest.get(i);
+            if(product.getAvailableQuantity() < productRequest.quantity()){
+                throw new ProductPurchaseException("Product with id " + product.getId() + " does not have enough quantity");
+            }
+            var newAvailableQuantity = product.getAvailableQuantity() - productRequest.quantity();
+            product.setAvailableQuantity(newAvailableQuantity);
+            repository.save(product);
+            purchasedProducts.add(mapper.toProductPurchaseResponse(product, productRequest.quantity()));
+        } 
+        return purchasedProducts;
     }
 
 }
