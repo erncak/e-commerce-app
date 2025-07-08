@@ -11,6 +11,8 @@ import com.erincak.ecommerce.kafka.OrderConfirmation;
 import com.erincak.ecommerce.kafka.OrderProducer;
 import com.erincak.ecommerce.orderline.OrderLineRequest;
 import com.erincak.ecommerce.orderline.OrderLineService;
+import com.erincak.ecommerce.payment.PaymentClient;
+import com.erincak.ecommerce.payment.PaymentRequest;
 import com.erincak.ecommerce.product.ProductClient;
 import com.erincak.ecommerce.product.PurchaseRequest;
 
@@ -27,6 +29,7 @@ public class OrderService {
     private final OrderMapper mapper;
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
+    private final PaymentClient paymentClient;
     public Integer createOrder(OrderRequest request) {
        //check the customer OpenFeign
         var customer = this.customerClient.findCustomerById(request.customerId())
@@ -49,7 +52,14 @@ public class OrderService {
                     )
                 );
         }
-
+        var paymentRequest = new PaymentRequest(
+            request.amount(),
+            request.paymentMethod(),
+            order.getId(),
+            order.getReference(),
+            customer
+        );
+        paymentClient.requestOrderPayment(paymentRequest);
        // todo start payment process
         orderProducer.sendOrderConfirmation(new OrderConfirmation(
                 request.reference(),
